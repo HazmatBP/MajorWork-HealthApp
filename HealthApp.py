@@ -15,6 +15,11 @@ def save_to_file():
     # clear the text box
     entry.delete(0, 'end')
 
+def on_key_press(event):
+    # check if "enter" key was pressed
+    if event.keysym == 'Return':
+        save_to_file()
+
 # create main tkinter window
 root = tk.Tk()
 
@@ -27,6 +32,9 @@ entry.pack()
 # create save button
 button = tk.Button(root, text='Save', command=save_to_file)
 button.pack()
+
+# bind "enter" key to save_to_file function
+entry.bind('<KeyPress>', on_key_press)
 
 # start main loop
 root.mainloop()
