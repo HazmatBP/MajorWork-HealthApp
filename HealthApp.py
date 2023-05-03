@@ -28,15 +28,15 @@ def save_on_key_press(event):
         save_to_file("saved_data.txt")
 
 # create main tkinter window
-root = ttk.Window(themename = 'darkly')
+app = ttk.Window(themename = 'darkly')
 
 # create title
-title = ttk.Label(root, text='Enter text to save:', font = 'Calibri 16 bold')
+title = ttk.Label(app, text='Enter text to save:', font = 'Calibri 16 bold')
 title.pack(padx = 10, pady = 5)
 
 
 # create input field 
-input_frame = ttk.Frame(root)
+input_frame = ttk.Labelframe(app, text = "Input")
 
 entry = ttk.Entry(input_frame)
 entry.pack(side = 'left', padx = 5, pady = 5)
@@ -49,9 +49,17 @@ reset_button.pack(side = 'right', padx= 5, pady = 5)
 
 input_frame.pack(padx= 5, pady = 5)
 
-
 # bind 'enter' key to save_to_file function
 entry.bind('<KeyPress>', save_on_key_press)
 
+
+# create output field
+output_frame = ttk.Labelframe(app, text = "Stats Output")
+
+output_message = ttk.Text(output_frame, state = 'disabled')
+output_message.pack(padx= 5, pady = 5)
+
+output_frame.pack(padx= 5, pady = 5)
+
 # start main loop
-root.mainloop()
+app.mainloop()
