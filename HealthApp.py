@@ -1,5 +1,5 @@
 import ttkbootstrap as ttk
-from datetime import date
+from datetime import *
 
 
 def save_to_file(filename):
@@ -7,16 +7,19 @@ def save_to_file(filename):
     user_input = entry.get()
 
     # get current date
-    current_date = date.today().strftime('%d/%m/%Y')
+    current_date = datetime.now().strftime('%d/%m/%Y %H:%M:%S')
 
     # write user input and current date to file
     with open(filename, 'a') as file:
-        file.write(f'{current_date}: {user_input}\n')
+        file.write(f'{current_date} - {user_input}\n')
 
     # clear the text box
     entry.delete(0, 'end')
 
-
+def read_dateinfo_from_file(filename, dictionary):
+    
+    
+    
 def reset_file(filename):
     # delete everything from the file
     open(filename, 'w').close()
