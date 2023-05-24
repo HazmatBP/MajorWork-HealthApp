@@ -2,8 +2,9 @@ import ttkbootstrap as ttk
 from datetime import *
 
 
-def save_with_date(filename, user_input):
+def save_with_date(filename, entry_widget):
     # get user input from entry widget
+    user_input = entry_widget.get()
     print(user_input)
     # get current date
     current_date = datetime.now().strftime('%d%m%Y')
@@ -11,6 +12,8 @@ def save_with_date(filename, user_input):
     # write user input and current date to file
     with open(filename, 'a') as file:
         file.write(f'{current_date}-{user_input}\n')
+        
+    entry_widget.delete(0, "end")
 
 
 def read_dateinfo_from_file(file_path):
@@ -23,7 +26,7 @@ def read_dateinfo_from_file(file_path):
         for i in range(len(lines)):
             split_line = lines[i].split("-") 
             date_dict.update({split_line[0], split_line[1]}) # adds a key:value pair to the dictionary, with the datestamp as the key and the value as the value
-     
+            
     file_path.close()  
     return date_dict
 
@@ -36,7 +39,7 @@ def reset_file(filename):
 def save_on_key_press(event):
     # check if 'enter' key was pressed
     if event.keysym == 'Return':
-        save_with_date("saved_data.txt")
+        save_with_date("saved_data.txt", entry)
 
 # create main tkinter window
 app = ttk.Window(themename = 'darkly')
@@ -53,7 +56,7 @@ entry = ttk.Entry(input_frame)
 entry.pack(side = 'left', padx = 5, pady = 5)
 
 
-save_button = ttk.Button(input_frame, text='Save', command = lambda : (save_with_date("saved_data.txt", entry.get())))
+save_button = ttk.Button(input_frame, text='Save', command = lambda : (save_with_date("saved_data.txt", entry.get(), entry)))
 
 save_button.pack(side = 'left', padx = 5, pady = 5)
 
