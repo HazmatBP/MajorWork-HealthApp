@@ -1,5 +1,7 @@
 import ttkbootstrap as ttk
 from datetime import *
+import json 
+import os 
 
 #! currently unused file saving functions, need to be rewritten to work when the program is started/closed
 # def save_steps_with_date(filename, entry_widget):
@@ -33,7 +35,36 @@ from datetime import *
 #     file_path.close()  
 #     return date_dict
 
-def save_with_date(filename, entry_widget, dictionary):
+
+def save_on_closing():
+    
+    print("Closing the program...")
+    
+    # writes the contents of the steps dictionary to a .json file
+    json.dump(steps_dict, open( "saved_data.json", 'w' ))
+    
+    # closes the window
+    app.destroy()
+    
+
+def load_json_to_dict(file_path):
+    
+    if os.path.exists(file_path):
+        # Load data from existing JSON file
+        with open(file_path) as file:
+            steps_dict = json.load(file)
+    else:
+        # Create new JSON file with an empty dictionary
+        steps_dict = {}
+
+        with open(file_path, "w") as file:
+            json.dump(steps_dict, file)
+            
+    return steps_dict      
+    
+
+def save_with_date(entry_widget, dictionary):
+    
     # get user input from entry widget
     user_input = entry_widget.get()
     
@@ -43,7 +74,8 @@ def save_with_date(filename, entry_widget, dictionary):
         print(user_input)
         # get current date
         current_date = datetime.now().strftime('%d%m%Y')
-
+        
+        
 
         # If the date being written to is already in the dictionary, this if statement will add the new value to the existing value instead of overwriting it.
         if current_date in dictionary: 
@@ -54,40 +86,27 @@ def save_with_date(filename, entry_widget, dictionary):
             
         else:
             dictionary.update({current_date: user_input})
-        
             
-        entry_widget.delete(0, "end")
-
-
-def read_dateinfo_from_file(file_path):
-    date_dict = {}
-    
-    with open(file_path, "r") as file:
-        lines = file.readlines()
-        split_line = [] # temporary array used to split the datestamp and value into seperate values  
+        print(dictionary)
         
-        for i in range(len(lines)):
-            split_line = lines[i].split("-") 
-            date_dict.update({split_line[0], split_line[1]}) # adds a key:value pair to the dictionary, with the datestamp as the key and the value as the value
-            
-    file_path.close()  
-    return date_dict
+        entry_widget.delete(0, "end") # clear the entry box
 
+ 
     
-def reset_file(filename):
-    # delete everything from the file
-    open(filename, 'w').close()
-    
+def reset_day(dictionary):
+
+    # replaces today's current 
+    current_date = datetime.now().strftime('%d%m%Y')
+    dictionary.update({current_date: 0})
     
 def save_on_key_press(event):
+    
     # check if 'enter' key was pressed
     if event.keysym == 'Return':
         save_with_date("saved_data.txt", entry)
 
 
 #! defining variables
-steps_dict = {}
-
 
 
 
@@ -96,23 +115,28 @@ steps_dict = {}
 # create main tkinter window
 app = ttk.Window(themename = 'darkly')
 
+# Bind the on_closing function to the "WM_DELETE_WINDOW" event
+app.protocol("WM_DELETE_WINDOW", save_on_closing)
+
+
+
 # create title
 title = ttk.Label(app, text='Enter text to save:', font = 'Calibri 16 bold')
 title.pack(padx = 10, pady = 5)
 
 
 # create input field 
-input_frame = ttk.Labelframe(app, text = "Input")
+input_frame = ttk.Labelframe(app, text = "Steps Recorder")
 
 entry = ttk.Entry(input_frame)
 entry.pack(side = 'left', padx = 5, pady = 5)
 
-
-save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date("saved_data.txt", entry, steps_dict))
+# create save button
+save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(entry, steps_dict))
 
 save_button.pack(side = 'left', padx = 5, pady = 5)
 
-reset_button = ttk.Button(input_frame, text = 'Reset', command = lambda: reset_file("saved_data.txt"))
+reset_button = ttk.Button(input_frame, text = 'Reset Day', command = lambda: reset_day(steps_dict))
 reset_button.pack(side = 'right', padx= 5, pady = 5)
 
 input_frame.pack(padx= 5, pady = 5)
@@ -131,8 +155,12 @@ output_message.pack(padx= 5, pady = 5)
 
 output_frame.pack(padx= 5, pady = 5)
 
-# start main loop
-app.mainloop()
+
+# Run app
+
+steps_dict = load_json_to_dict("saved_data.json")
+
+app.mainloop()    
 
 
 
