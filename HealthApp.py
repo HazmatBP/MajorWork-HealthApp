@@ -1,39 +1,11 @@
+# Written by Harry McGrath for Year 12 SDD, 2023
+#? this colour of comment denotes weird shit that still works for some reason
+
+
 import ttkbootstrap as ttk
 from datetime import *
 import json 
 import os 
-
-#! currently unused file saving functions, need to be rewritten to work when the program is started/closed
-# def save_steps_with_date(filename, entry_widget):
-#     # get user input from entry widget
-#     user_input = entry_widget.get()
-    
-#     if user_input.isnumeric(): #only saves the data if the input is a number.
-        
-#         user_input = int(user_input)
-#         print(user_input)
-#         # get current date
-#         current_date = datetime.now().strftime('%d%m%Y')
-
-#         # write user input and current date to file
-#         with open(filename, 'a') as file:
-#             file.write(f'{current_date}-{user_input}\n')
-            
-#         entry_widget.delete(0, "end")
-
-# def read_dateinfo_from_file(file_path):
-#     date_dict = {}
-    
-#     with open(file_path, "r") as file:
-#         lines = file.readlines()
-#         split_line = [] # temporary array used to split the datestamp and value into seperate values  
-        
-#         for i in range(len(lines)):
-#             split_line = lines[i].split("-") 
-#             date_dict.update({split_line[0], split_line[1]}) # adds a key:value pair to the dictionary, with the datestamp as the key and the value as the value
-            
-#     file_path.close()  
-#     return date_dict
 
 
 def save_on_closing():
@@ -63,6 +35,20 @@ def load_json_to_dict(file_path):
     return steps_dict      
     
 
+
+def get_date():
+    
+    selected_date = date_selector.entry.get()   #? weird internal object magic, is basically just get_date() except it actually works
+
+    # Parse the input string as a datetime object
+    date_obj = datetime.strptime(selected_date, '%d/%m/%Y')
+    
+    # Format the datetime object as "YYYYMMDD" string   #? this uses this horribly unreadable date formatting for easy dictionary sorting later
+    
+    formatted_date = date_obj.strftime('%Y%m%d')
+    
+    return formatted_date
+
 def save_with_date(entry_widget, dictionary):
     
     # get user input from entry widget
@@ -73,8 +59,9 @@ def save_with_date(entry_widget, dictionary):
         user_input = int(user_input)
         print(user_input)
         # get current date
-        current_date = datetime.now().strftime('%d%m%Y')
+        current_date = get_date()
         
+
         
 
         # If the date being written to is already in the dictionary, this if statement will add the new value to the existing value instead of overwriting it.
@@ -121,23 +108,28 @@ app.protocol("WM_DELETE_WINDOW", save_on_closing)
 
 
 # create title
-title = ttk.Label(app, text='Enter text to save:', font = 'Calibri 16 bold')
+title = ttk.Label(app, text='Health App', font = 'Calibri 16 bold')
 title.pack(padx = 10, pady = 5)
 
-
-# create input field 
+# create input frame 
 input_frame = ttk.Labelframe(app, text = "Steps Recorder")
 
+# create date selector 
+date_selector = ttk.DateEntry(input_frame)
+date_selector.pack(side = 'left', padx = 5, pady = 5)
+
+# create entry field
 entry = ttk.Entry(input_frame)
 entry.pack(side = 'left', padx = 5, pady = 5)
 
 # create save button
 save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(entry, steps_dict))
-
 save_button.pack(side = 'left', padx = 5, pady = 5)
 
+# create reset button
 reset_button = ttk.Button(input_frame, text = 'Reset Day', command = lambda: reset_day(steps_dict))
 reset_button.pack(side = 'right', padx= 5, pady = 5)
+
 
 input_frame.pack(padx= 5, pady = 5)
 
