@@ -8,6 +8,9 @@ import json
 import os 
 
 
+appRunning = True   # variable is always true while the app is running
+
+
 def save_on_closing():
     
     print("Closing the program...")
@@ -16,8 +19,8 @@ def save_on_closing():
     json.dump(steps_dict, open( "saved_data.json", 'w' ))
     
     # closes the window
+    appRunning = False
     app.destroy()
-    
 
 def load_json_to_dict(file_path):
     
@@ -152,7 +155,12 @@ output_frame.pack(padx= 5, pady = 5)
 
 steps_dict = load_json_to_dict("saved_data.json")
 
-app.mainloop()    
+
+while appRunning:
+    app.update()
+    
+   
+app.destroy()
 
 
 
