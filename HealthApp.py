@@ -22,20 +22,27 @@ def save_on_closing():
     appRunning = False
     app.destroy()
 
+
 def load_json_to_dict(file_path):
-    
     if os.path.exists(file_path):
-        # Load data from existing JSON file
-        with open(file_path) as file:
-            steps_dict = json.load(file)
+        # Check if the file is empty
+        if os.stat(file_path).st_size == 0:
+            # Create new JSON file with an empty dictionary
+            output_dict = {}
+            with open(file_path, "w") as file:
+                json.dump(output_dict, file)
+        else:
+            # Load data from existing non-empty JSON file
+            with open(file_path) as file:
+                output_dict = json.load(file)
     else:
         # Create new JSON file with an empty dictionary
-        steps_dict = {}
-
+        output_dict = {}
         with open(file_path, "w") as file:
-            json.dump(steps_dict, file)
+            json.dump(output_dict, file)
             
-    return steps_dict      
+    return output_dict
+
     
 
 
@@ -85,7 +92,7 @@ def save_with_date(entry_widget, dictionary):
     
 def reset_day(dictionary):
 
-    # replaces today's current 
+    # replaces today's current value with 0
     current_date = datetime.now().strftime('%d%m%Y')
     dictionary.update({current_date: 0})
     
@@ -93,13 +100,10 @@ def save_on_key_press(event):
     
     # check if 'enter' key was pressed
     if event.keysym == 'Return':
-        save_with_date("saved_data.txt", entry)
+        save_with_date(steps_entry, steps_dict)
 
 
-#! defining variables
-
-
-
+#! creating widgets 
 
 
 # create main tkinter window
@@ -117,16 +121,25 @@ title.pack(padx = 10, pady = 5)
 # create input frame 
 input_frame = ttk.Labelframe(app, text = "Steps Recorder")
 
+# create date radiobutton
+date_radio_var = ttk.StringVar()
+
+date_radio_button1 = ttk.Radiobutton(input_frame, text="Current Date", variable = date_radio_var, value="current_date")
+date_radio_button2 = ttk.Radiobutton(input_frame, text="Select Date:", variable = date_radio_var, value="select_date")
+
+date_radio_button1.pack(padx = 5, pady = 5)
+date_radio_button2.pack(padx = 5, pady = 5)
+
 # create date selector 
 date_selector = ttk.DateEntry(input_frame)
 date_selector.pack(side = 'left', padx = 5, pady = 5)
 
 # create entry field
-entry = ttk.Entry(input_frame)
-entry.pack(side = 'left', padx = 5, pady = 5)
+steps_entry = ttk.Entry(input_frame)
+steps_entry.pack(side = 'left', padx = 5, pady = 5)
 
 # create save button
-save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(entry, steps_dict))
+save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(steps_entry, steps_dict))
 save_button.pack(side = 'left', padx = 5, pady = 5)
 
 # create reset button
@@ -137,7 +150,7 @@ reset_button.pack(side = 'right', padx= 5, pady = 5)
 input_frame.pack(padx= 5, pady = 5)
 
 # bind 'enter' key to save_to_file function
-entry.bind('<KeyPress>', save_on_key_press)
+steps_entry.bind('<KeyPress>', save_on_key_press)
 
 
 
@@ -153,13 +166,13 @@ output_frame.pack(padx= 5, pady = 5)
 
 # Run app
 
+# load dictionary from file before anything else happens
 steps_dict = load_json_to_dict("saved_data.json")
 
 
 while appRunning:
     app.update()
     
-   
 app.destroy()
 
 
