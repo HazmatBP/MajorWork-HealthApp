@@ -20,7 +20,6 @@ def save_on_closing():
 
     # closes the window
     appRunning = False
-    app.destroy()
 
 
 def load_json_to_dict(file_path):
@@ -97,6 +96,11 @@ def save_with_date(entry_widget, dictionary):
         entry_widget.delete(0, "end") # clear the entry box
 
 
+def update_widget_with_dict(text_widget, dictionary):
+    text_widget.configure(state= "normal")
+    text_widget.insert()
+    #! needs finishing
+    
 
 def reset_day(dictionary):
 
@@ -111,8 +115,6 @@ def save_on_key_press(event):
     if event.keysym == 'Return':
         save_with_date(steps_entry, steps_dict)
 
-
-#! creating widgets
 
 
 # create main tkinter window
@@ -164,7 +166,7 @@ steps_entry.bind('<KeyPress>', save_on_key_press)
 # create output field
 output_frame = ttk.Labelframe(app, text = "Stats Output")
 
-output_message = ttk.Text(output_frame, state = 'disabled')
+output_message = ttk.Text(output_frame, state= "disabled")
 output_message.pack(padx= 5, pady = 5)
 
 output_frame.pack(padx= 5, pady = 5)
@@ -177,7 +179,6 @@ steps_dict = load_json_to_dict("saved_data.json")
 
 
 while appRunning:
-    app.update()
 
 app.destroy()
 
