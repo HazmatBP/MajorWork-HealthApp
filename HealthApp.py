@@ -44,7 +44,16 @@ def load_json_to_dict(file_path):
     return output_dict
 
 
-
+def sort_dict_by_key(dictionary):
+    keys = list(dictionary.keys()) # makes a list of all the keys in the dictionary
+    keys.sort() # sorts said list of keys
+    
+    new_dict = {}
+    for key in keys:
+        new_dict[key] = dictionary[key] 
+        # goes through the old dict and puts all their values in the correct positions in the new dict
+        
+    return new_dict
 
 def get_date():
 
@@ -75,12 +84,9 @@ def save_with_date(entry_widget, dictionary):
     if user_input.isnumeric(): #only saves the data if the input is a number.
 
         user_input = int(user_input)
-        print(user_input) #todo dev print statement
+        #print(user_input) #todo dev print statement
         # get current date
         current_date = get_date()
-
-
-
 
         # If the date being written to is already in the dictionary, this if statement will add the new value to the existing value instead of overwriting it.
         if current_date in dictionary:
@@ -92,7 +98,7 @@ def save_with_date(entry_widget, dictionary):
         else:
             dictionary.update({current_date: user_input})
 
-        print(dictionary) #todo dev print statement
+        #print(dictionary) #todo dev print statement
 
         entry_widget.delete(0, END) # clear the entry box
 
@@ -101,7 +107,10 @@ def update_widget_with_dict(text_widget, dictionary, value_type):
     # value_type is the prefix added before the value in the output.
     # For example, value_type = "Pushups" will give a result like 19/02/2023 - Pushups: 35
     
-    text_widget.configure(state= "normal")
+    dictionary = sort_dict_by_key(dictionary)
+    
+    print(dictionary)
+    text_widget.configure(state= "normal") # "opens" the text widget so its contents can be edited
     
     text_widget.delete(1.0, END) # deletes any text currently in the widget
     
@@ -109,14 +118,16 @@ def update_widget_with_dict(text_widget, dictionary, value_type):
     
     for i in dictionary:
         #todo  i is the key, dictionary[i] is the corresponding value
-        
+
         date_obj = datetime.strptime(i, '%Y%m%d') # parses the key as a datetime object
         
         readable_date = date_obj.strftime('%d/%m/%Y') # converts the date formatting back into a string, with a nice readable format
         
-        final_string += f"{readable_date} - {value_type}: {dictionary[i]}" # adds the entry to the final string, with some nice formatting
-        
-    text_widget.configure(state= "disabled")   
+        final_string += f"{readable_date} - {value_type}: {dictionary[i]} \n" # adds the entry to the final string, with some nice formatting
+    
+    text_widget.insert(1.0, final_string)
+    
+    text_widget.configure(state= "disabled") # "closes" the text widget so that the user cannot modify its contents 
     #! needs finishing
     
 
@@ -125,7 +136,7 @@ def reset_day(dictionary):
     # replaces today's current value with 0
     current_date = datetime.now().strftime('%Y%m%d')
     dictionary.update({current_date: 0})
-    print(dictionary) #todo dev print statement
+    #print(dictionary) #todo dev print statement
 
 def save_on_key_press(event):
 
