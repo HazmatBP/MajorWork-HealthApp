@@ -3,6 +3,7 @@
 
 
 import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
 from datetime import *
 import json
 import os
@@ -93,19 +94,36 @@ def save_with_date(entry_widget, dictionary):
 
         print(dictionary) #todo dev print statement
 
-        entry_widget.delete(0, "end") # clear the entry box
+        entry_widget.delete(0, END) # clear the entry box
 
 
-def update_widget_with_dict(text_widget, dictionary):
+def update_widget_with_dict(text_widget, dictionary, value_type): 
+    # value_type is the prefix added before the value in the output.
+    # For example, value_type = "Pushups" will give a result like 19/02/2023 - Pushups: 35
+    
     text_widget.configure(state= "normal")
-    text_widget.insert()
+    
+    text_widget.delete(1.0, END) # deletes any text currently in the widget
+    
+    final_string = f"" # final string to be inserted into the widget
+    
+    for i in dictionary:
+        #todo  i is the key, dictionary[i] is the corresponding value
+        
+        date_obj = datetime.strptime(i, '%Y%m%d') # parses the key as a datetime object
+        
+        readable_date = date_obj.strftime('%d/%m/%Y') # converts the date formatting back into a string, with a nice readable format
+        
+        final_string += f"{readable_date} - {value_type}: {dictionary[i]}" # adds the entry to the final string, with some nice formatting
+        
+    text_widget.configure(state= "disabled")   
     #! needs finishing
     
 
 def reset_day(dictionary):
 
     # replaces today's current value with 0
-    current_date = datetime.now().strftime('%d%m%Y')
+    current_date = datetime.now().strftime('%Y%m%d')
     dictionary.update({current_date: 0})
     print(dictionary) #todo dev print statement
 
@@ -172,14 +190,15 @@ output_message.pack(padx= 5, pady = 5)
 output_frame.pack(padx= 5, pady = 5)
 
 
-# Run app
+
 
 # load dictionary from file before anything else happens
 steps_dict = load_json_to_dict("saved_data.json")
 
-
+# Run app
 while appRunning:
-
+    app.update()
+    update_widget_with_dict(output_message, steps_dict, "Steps")
 app.destroy()
 
 
