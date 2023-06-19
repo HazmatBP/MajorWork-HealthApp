@@ -97,12 +97,25 @@ def save_with_date(entry_widget, dictionary):
         entry_widget.delete(0, END) # clear the entry box
 
 
-def update_widget_with_dict(text_widget, dictionary):
+def update_widget_with_dict(text_widget, dictionary, value_type): 
+    # value_type is the prefix added before the value in the output.
+    # For example, value_type = "Pushups" will give a result like 19/02/2023 - Pushups: 35
+    
     text_widget.configure(state= "normal")
-    text_widget.delete(1.0, END)
-    text_widget.insert(1.0, dictionary)
+    
+    text_widget.delete(1.0, END) # deletes any text currently in the widget
+    
+    final_string = f"" # final string to be inserted into the widget
+    
     for i in dictionary:
-        dictionary[i]
+        #todo  i is the key, dictionary[i] is the corresponding value
+        
+        date_obj = datetime.strptime(i, '%Y%m%d') # parses the key as a datetime object
+        
+        readable_date = date_obj.strftime('%d/%m/%Y') # converts the date formatting back into a string, with a nice readable format
+        
+        final_string += f"{readable_date} - {value_type}: {dictionary[i]}" # adds the entry to the final string, with some nice formatting
+        
     text_widget.configure(state= "disabled")   
     #! needs finishing
     
@@ -185,7 +198,7 @@ steps_dict = load_json_to_dict("saved_data.json")
 
 while appRunning:
     app.update()
-    update_widget_with_dict(output_message, steps_dict)
+    update_widget_with_dict(output_message, steps_dict, "Steps")
 app.destroy()
 
 
