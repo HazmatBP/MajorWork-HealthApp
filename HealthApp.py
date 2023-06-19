@@ -190,12 +190,12 @@ output_message.pack(padx= 5, pady = 5)
 output_frame.pack(padx= 5, pady = 5)
 
 
-# Run app
+
 
 # load dictionary from file before anything else happens
 steps_dict = load_json_to_dict("saved_data.json")
 
-
+# Run app
 while appRunning:
     app.update()
     update_widget_with_dict(output_message, steps_dict, "Steps")
