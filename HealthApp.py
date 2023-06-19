@@ -71,9 +71,11 @@ def get_date():
     # return either the date from the selector or todays date depending on radiobutton choice
     if date_choice == "current_date":
         # return date from selector
+        print("selected date chosen") #! test print statements
         return formatted_date
     else:
         # return todays date 
+        print("today's date chosen") #! test print statements
         return datetime.today().strftime('%Y%m%d')
 
 def save_with_date(entry_widget, dictionary):
@@ -107,9 +109,8 @@ def update_widget_with_dict(text_widget, dictionary, value_type):
     # value_type is the prefix added before the value in the output.
     # For example, value_type = "Pushups" will give a result like 19/02/2023 - Pushups: 35
     
-    dictionary = sort_dict_by_key(dictionary)
+    dictionary = sort_dict_by_key(dictionary) 
     
-    print(dictionary)
     text_widget.configure(state= "normal") # "opens" the text widget so its contents can be edited
     
     text_widget.delete(1.0, END) # deletes any text currently in the widget
@@ -134,7 +135,7 @@ def update_widget_with_dict(text_widget, dictionary, value_type):
 def reset_day(dictionary):
 
     # replaces today's current value with 0
-    current_date = datetime.now().strftime('%Y%m%d')
+    current_date = get_date()
     dictionary.update({current_date: 0})
     #print(dictionary) #todo dev print statement
 
