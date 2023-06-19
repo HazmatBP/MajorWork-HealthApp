@@ -3,6 +3,7 @@
 
 
 import ttkbootstrap as ttk
+from ttkbootstrap.constants import *
 from datetime import *
 import json
 import os
@@ -93,19 +94,23 @@ def save_with_date(entry_widget, dictionary):
 
         print(dictionary) #todo dev print statement
 
-        entry_widget.delete(0, "end") # clear the entry box
+        entry_widget.delete(0, END) # clear the entry box
 
 
 def update_widget_with_dict(text_widget, dictionary):
     text_widget.configure(state= "normal")
-    text_widget.insert()
+    text_widget.delete(1.0, END)
+    text_widget.insert(1.0, dictionary)
+    for i in dictionary:
+        dictionary[i]
+    text_widget.configure(state= "disabled")   
     #! needs finishing
     
 
 def reset_day(dictionary):
 
     # replaces today's current value with 0
-    current_date = datetime.now().strftime('%d%m%Y')
+    current_date = datetime.now().strftime('%Y%m%d')
     dictionary.update({current_date: 0})
     print(dictionary) #todo dev print statement
 
@@ -179,7 +184,8 @@ steps_dict = load_json_to_dict("saved_data.json")
 
 
 while appRunning:
-
+    app.update()
+    update_widget_with_dict(output_message, steps_dict)
 app.destroy()
 
 
