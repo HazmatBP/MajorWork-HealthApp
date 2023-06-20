@@ -1,9 +1,10 @@
 # Written by Harry McGrath for Year 12 SDD, 2023
 #? this colour of comment denotes weird shit that still works for some reason
 
-
+# Importing libraries
 import ttkbootstrap as ttk
 from ttkbootstrap.constants import *
+from tkinter import messagebox
 from datetime import *
 import json
 import os
@@ -69,7 +70,7 @@ def get_date():
     date_choice = date_radio_var.get()
 
     # return either the date from the selector or todays date depending on radiobutton choice
-    if date_choice == "current_date":
+    if date_choice == "select_date":
         # return date from selector
         print("selected date chosen") #! test print statements
         return formatted_date
@@ -77,6 +78,23 @@ def get_date():
         # return todays date 
         print("today's date chosen") #! test print statements
         return datetime.today().strftime('%Y%m%d')
+
+def insert_missing_dates(dictionary):
+    new_dictionary = {}
+    keys = list(dictionary.keys())
+    start_date = datetime.strptime(keys[0], '%Y%m%d')
+    end_date = datetime.strptime(keys[-1], '%Y%m%d')
+    current_date = start_date
+
+    while current_date <= end_date:
+        date_str = current_date.strftime('%Y%m%d')
+        if date_str in dictionary:
+            new_dictionary[date_str] = dictionary[date_str]
+        else:
+            new_dictionary[date_str] = 0
+        current_date += timedelta(days=1)
+
+    return new_dictionary
 
 def save_with_date(entry_widget, dictionary):
 
@@ -118,7 +136,7 @@ def update_widget_with_dict(text_widget, dictionary, value_type):
     final_string = f"" # final string to be inserted into the widget
     
     for i in dictionary:
-        #todo  i is the key, dictionary[i] is the corresponding value
+        #? i is the key, dictionary[i] is the corresponding value
 
         date_obj = datetime.strptime(i, '%Y%m%d') # parses the key as a datetime object
         
@@ -137,8 +155,16 @@ def reset_day(dictionary):
     # replaces today's current value with 0
     current_date = get_date()
     dictionary.update({current_date: 0})
-    #print(dictionary) #todo dev print statement
 
+def clear_dict_confirm(dictionary, message):
+    # Display a confirmation dialog box
+    response = messagebox.askquestion("Confirmation", message)
+
+    # Check the user's response
+    if response == 'yes':
+        # Reset the history
+        dictionary.clear()
+        
 def save_on_key_press(event):
 
     # check if 'enter' key was pressed
@@ -179,14 +205,20 @@ date_selector.pack(side = 'left', padx = 5, pady = 5)
 steps_entry = ttk.Entry(input_frame)
 steps_entry.pack(side = 'left', padx = 5, pady = 5)
 
+#? Reason why lambda is used: ttk classes require a function with no inputs in the "command" parameter,
+#? and the workaround to this is using lambda to turn functions that have inputs into temporary inputless functions
+
 # create save button
 save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(steps_entry, steps_dict))
 save_button.pack(side = 'left', padx = 5, pady = 5)
 
-# create reset button
-reset_button = ttk.Button(input_frame, text = 'Reset Day', command = lambda: reset_day(steps_dict))
-reset_button.pack(side = 'right', padx= 5, pady = 5)
+# create clear history button
+clear_history_button = ttk.Button(input_frame, text = 'Clear History', command = lambda: clear_dict_confirm(steps_dict, "Are you sure you want to clear your steps history?"))
+clear_history_button.pack(side = 'right', padx= 5, pady = 5)
 
+# create reset day button
+reset_day_button = ttk.Button(input_frame, text = 'Reset Day', command = lambda: reset_day(steps_dict))
+reset_day_button.pack(side = 'right', padx= 5, pady = 5)
 
 input_frame.pack(padx= 5, pady = 5)
 
