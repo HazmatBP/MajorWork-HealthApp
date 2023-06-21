@@ -72,11 +72,9 @@ def get_date():
     # return either the date from the selector or todays date depending on radiobutton choice
     if date_choice == "select_date":
         # return date from selector
-        print("selected date chosen") #! test print statements
         return formatted_date
     else:
         # return todays date 
-        print("today's date chosen") #! test print statements
         return datetime.today().strftime('%Y%m%d')
 
 def insert_missing_dates(dictionary):
@@ -224,32 +222,35 @@ input_frame.pack(padx= 5, pady = 5)
 # bind 'enter' key to save_to_file function
 steps_entry.bind('<KeyPress>', save_on_key_press)
 
-# create output frame
-output_frame = ttk.Labelframe(app, text = "Stats Log")
-
-# create output message
-output_message = ttk.Text(output_frame, state= "disabled")
-output_message.pack(padx= 5, pady = 5)
-
-output_frame.pack(padx= 5, pady = 5)
-
 # create steps goal frame
 steps_goal_frame = ttk.Labelframe(app, text = "Daily Goal")
 
-steps_goal = ttk.IntVar()
-steps_goal.set(8000) # sets the daily goal to 8000 by default
+steps_goal = 8000 # sets the default ste
 
 steps_goal_meter = ttk.Meter(
     steps_goal_frame, 
     subtext = "Steps",
     meterthickness = 25,
     interactive = True,
-    amounttotal = steps_goal.get(),
+    amounttotal = steps_goal,
+    stripethickness= 12
     # todo: change this so it uses .config(), as this method doesn't let you change the amounttotal later
     )
 steps_goal_meter.pack(padx= 5, pady = 5)
 
 steps_goal_frame.pack(side = "right", padx= 5, pady = 5)
+
+# create output frame
+
+output_frame = ttk.Labelframe(app, text = "Stats Log")
+
+# create output message
+output_message = ttk.Text(output_frame, state= "disabled", height= 12.4)
+output_message.pack(padx= 5, pady = 5)
+
+output_frame.pack(side = "left", padx= 5, pady = 5)
+
+
 
 
 
