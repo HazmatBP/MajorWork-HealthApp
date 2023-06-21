@@ -113,7 +113,8 @@ def insert_missing_dates(dictionary):
     return new_dictionary
 
 def save_with_date(entry_widget, dictionary):
-
+    #TODO NOT SURE IF PASSES BY REFERENCE: global steps_dict
+    
     # get user input from entry widget
     user_input = entry_widget.get()
 
@@ -139,11 +140,13 @@ def save_with_date(entry_widget, dictionary):
         
         dictionary = insert_missing_dates(dictionary)
         
+        #TODO NOT SURE IF PASSES BY REF: steps_dict = dictionary
+        
         # update the output box
         update_output_with_dict(output_message, dictionary, "Steps")
         
         # update the daily goal meter
-        update_meter(steps_goal_meter, dictionary)
+        update_meter(steps_meter, dictionary)
 
 
 def update_output_with_dict(text_widget, dictionary, value_type): 
@@ -181,7 +184,7 @@ def reset_day(dictionary):
     update_output_with_dict(output_message, dictionary, "Steps")
     
     # update the daily goal meter
-    update_meter(steps_goal_meter, dictionary)
+    update_meter(steps_meter, dictionary)
     
 
 def clear_dict_confirm(dictionary, message):
@@ -201,7 +204,7 @@ def clear_dict_confirm(dictionary, message):
     update_output_with_dict(output_message, dictionary, "Steps")
     
     # update the daily goal meter
-    update_meter(steps_goal_meter, dictionary)
+    update_meter(steps_meter, dictionary)
     
 def save_on_key_press(event):
 
@@ -264,21 +267,28 @@ input_frame.pack(padx= 5, pady = 5)
 steps_entry.bind('<KeyPress>', save_on_key_press)
 
 # create steps goal frame
-steps_goal_frame = ttk.Labelframe(app, text = "Daily Goal")
+steps_meter_frame = ttk.Labelframe(app, text = "Daily Goal")
 
-
-steps_goal_meter = ttk.Meter(
-    steps_goal_frame, 
+# create steps goal meter
+steps_meter = ttk.Meter(
+    steps_meter_frame, 
     subtext = "Steps",
     meterthickness = 25,
     amounttotal = 8000,
     stripethickness = 4,
     bootstyle= SUCCESS
-    # todo: change this so it uses .config(), as this method doesn't let you change the amounttotal later
     )
-steps_goal_meter.pack(padx= 5, pady = 5)
 
-steps_goal_frame.pack(side = "right", padx= 5, pady = 5)
+steps_meter.pack(padx= 5, pady = 5)
+
+# steps goal editor section 
+steps_goal_editor_frame = ttk.Frame(steps_meter_frame) # creates an invisible frame so that the edit goal text and button can be placed properly
+
+edit_step_goal_text = ttk.Label(steps_goal_editor_frame, text= "Test")
+edit_step_goal_text.pack(padx= 5, pady = 5)
+
+steps_goal_editor_frame.pack(padx= 5, pady = 5)
+steps_meter_frame.pack(side = "right", padx= 5, pady = 5)
 
 def set_meter_total(meter_widget, total):
     meter_widget.configure(amounttotal= total)
@@ -312,7 +322,7 @@ output_frame.pack(side = "left", padx= 5, pady = 5)
 steps_dict = load_json_to_dict("saved_data.json")
 
 # update the steps goal meter so it doesn't display 0 at first
-update_meter(steps_goal_meter, steps_dict)
+update_meter(steps_meter, steps_dict)
 
 update_output_with_dict(output_message, steps_dict, "Steps")
 
