@@ -102,7 +102,6 @@ def save_with_date(entry_widget, dictionary):
     if user_input.isnumeric(): #only saves the data if the input is a number.
 
         user_input = int(user_input)
-        #print(user_input) #todo dev print statement
         # get current date
         current_date = get_date()
 
@@ -116,8 +115,10 @@ def save_with_date(entry_widget, dictionary):
         else:
             dictionary.update({current_date: user_input})
 
-        #print(dictionary) #todo dev print statement
         entry_widget.delete(0, END) # clear the entry box
+        
+        # update the daily goal meter
+        update_meter(steps_goal_meter, steps_dict)
 
 
 def update_widget_with_dict(text_widget, dictionary, value_type): 
@@ -144,7 +145,6 @@ def update_widget_with_dict(text_widget, dictionary, value_type):
     text_widget.insert(1.0, final_string)
     
     text_widget.configure(state= "disabled") # "closes" the text widget so that the user cannot modify its contents 
-    #! needs finishing
     
 
 def reset_day(dictionary):
@@ -152,6 +152,9 @@ def reset_day(dictionary):
     # replaces today's current value with 0
     current_date = get_date()
     dictionary.update({current_date: 0})
+
+    # update the daily goal meter
+    update_meter(steps_goal_meter, steps_dict)
 
 def clear_dict_confirm(dictionary, message):
     # Display a confirmation dialog box
@@ -161,7 +164,10 @@ def clear_dict_confirm(dictionary, message):
     if response == 'yes':
         # Reset the history
         dictionary.clear()
-        
+    
+    # update the daily goal meter
+    update_meter(steps_goal_meter, steps_dict)
+    
 def save_on_key_press(event):
 
     # check if 'enter' key was pressed
@@ -171,7 +177,7 @@ def save_on_key_press(event):
 
 
 # create main tkinter window
-app = ttk.Window(themename = 'darkly')
+app = ttk.Window(themename = 'darkly', title="Health App")
 
 # Bind the on_closing function to the "WM_DELETE_WINDOW" event
 app.protocol("WM_DELETE_WINDOW", save_on_closing)
@@ -225,20 +231,34 @@ steps_entry.bind('<KeyPress>', save_on_key_press)
 # create steps goal frame
 steps_goal_frame = ttk.Labelframe(app, text = "Daily Goal")
 
-steps_goal = 8000 # sets the default ste
 
 steps_goal_meter = ttk.Meter(
     steps_goal_frame, 
     subtext = "Steps",
     meterthickness = 25,
     interactive = True,
-    amounttotal = steps_goal,
-    stripethickness= 12
+    amounttotal = 8000,
+    stripethickness = 4,
+    bootstyle= SUCCESS
     # todo: change this so it uses .config(), as this method doesn't let you change the amounttotal later
     )
 steps_goal_meter.pack(padx= 5, pady = 5)
 
 steps_goal_frame.pack(side = "right", padx= 5, pady = 5)
+
+def set_meter_total(meter_widget, total):
+    meter_widget.configure(amounttotal= total)
+
+def update_meter(meter, dictionary):
+    current_date = datetime.today().strftime('%Y%m%d') # get current date
+    
+    # if the current date has an entry in the dictionary, set the meter to that value, otherwise set it to 0 
+    try:
+        value = dictionary[current_date]
+    except:
+        value = 0
+        
+    meter.configure(amountused = value)
 
 # create output frame
 
@@ -254,10 +274,15 @@ output_frame.pack(side = "left", padx= 5, pady = 5)
 
 
 
-# load dictionary from file before anything else happens
+# load dictionary from file 
 steps_dict = load_json_to_dict("saved_data.json")
 
+# update the steps goal meter so it doesn't display 0 at first
+update_meter(steps_goal_meter, steps_dict)
+
 # Run app
+
+update_meter(steps_goal_meter, steps_dict)
 while appRunning:
     app.update()
     update_widget_with_dict(output_message, steps_dict, "Steps")
