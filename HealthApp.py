@@ -18,7 +18,7 @@ def save_on_closing():
     print("Closing the program...")
 
     # writes the contents of the steps dictionary to a .json file
-    json.dump(steps_dict, open( "saved_data.json", 'w' ))
+    json.dump(steps_dict, open( "saved_data.json", "w" ))
 
     # closes the window
     appRunning = False
@@ -119,7 +119,6 @@ def save_with_date(entry_widget, dictionary):
             dictionary.update({current_date: user_input})
 
         #print(dictionary) #todo dev print statement
-
         entry_widget.delete(0, END) # clear the entry box
 
 
@@ -225,14 +224,32 @@ input_frame.pack(padx= 5, pady = 5)
 # bind 'enter' key to save_to_file function
 steps_entry.bind('<KeyPress>', save_on_key_press)
 
-# create output field
-output_frame = ttk.Labelframe(app, text = "Stats Output")
+# create output frame
+output_frame = ttk.Labelframe(app, text = "Stats Log")
 
+# create output message
 output_message = ttk.Text(output_frame, state= "disabled")
 output_message.pack(padx= 5, pady = 5)
 
 output_frame.pack(padx= 5, pady = 5)
 
+# create steps goal frame
+steps_goal_frame = ttk.Labelframe(app, text = "Daily Goal")
+
+steps_goal = ttk.IntVar()
+steps_goal.set(8000) # sets the daily goal to 8000 by default
+
+steps_goal_meter = ttk.Meter(
+    steps_goal_frame, 
+    subtext = "Steps",
+    meterthickness = 25,
+    interactive = True,
+    amounttotal = steps_goal.get(),
+    # todo: change this so it uses .config(), as this method doesn't let you change the amounttotal later
+    )
+steps_goal_meter.pack(padx= 5, pady = 5)
+
+steps_goal_frame.pack(side = "right", padx= 5, pady = 5)
 
 
 
