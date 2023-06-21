@@ -78,18 +78,36 @@ def get_date():
         return datetime.today().strftime('%Y%m%d')
 
 def insert_missing_dates(dictionary):
+    
+    sort_dict_by_key(dictionary)
+    
     new_dictionary = {}
     keys = list(dictionary.keys())
+
+    if not keys:
+        # If the dictionary is empty, return an empty dictionary
+        print("returning empty dict")
+        return new_dictionary
+    
+    # Get the start and end dates from the dictionary
     start_date = datetime.strptime(keys[0], '%Y%m%d')
     end_date = datetime.strptime(keys[-1], '%Y%m%d')
     current_date = start_date
 
+    # Iterate through the dates between start_date and end_date (inclusive)
     while current_date <= end_date:
+        # Format the current date as YYYYMMDD
         date_str = current_date.strftime('%Y%m%d')
+
+        # Check if the date exists in the dictionary
         if date_str in dictionary:
+            # If the date exists, copy the corresponding value to the new dictionary
             new_dictionary[date_str] = dictionary[date_str]
         else:
+            # If the date is missing, assign 0 as the value in the new dictionary
             new_dictionary[date_str] = 0
+
+        # Move to the next date
         current_date += timedelta(days=1)
 
     return new_dictionary
@@ -117,15 +135,20 @@ def save_with_date(entry_widget, dictionary):
 
         entry_widget.delete(0, END) # clear the entry box
         
+        dictionary = sort_dict_by_key(dictionary)
+        
+        dictionary = insert_missing_dates(dictionary)
+        
+        # update the output box
+        update_output_with_dict(output_message, dictionary, "Steps")
+        
         # update the daily goal meter
-        update_meter(steps_goal_meter, steps_dict)
+        update_meter(steps_goal_meter, dictionary)
 
 
-def update_widget_with_dict(text_widget, dictionary, value_type): 
+def update_output_with_dict(text_widget, dictionary, value_type): 
     # value_type is the prefix added before the value in the output.
     # For example, value_type = "Pushups" will give a result like 19/02/2023 - Pushups: 35
-    
-    dictionary = sort_dict_by_key(dictionary) 
     
     text_widget.configure(state= "normal") # "opens" the text widget so its contents can be edited
     
@@ -153,8 +176,13 @@ def reset_day(dictionary):
     current_date = get_date()
     dictionary.update({current_date: 0})
 
+
+    # update the output box
+    update_output_with_dict(output_message, dictionary, "Steps")
+    
     # update the daily goal meter
-    update_meter(steps_goal_meter, steps_dict)
+    update_meter(steps_goal_meter, dictionary)
+    
 
 def clear_dict_confirm(dictionary, message):
     # Display a confirmation dialog box
@@ -165,8 +193,15 @@ def clear_dict_confirm(dictionary, message):
         # Reset the history
         dictionary.clear()
     
+    sort_dict_by_key(dictionary)
+    
+    insert_missing_dates(dictionary)
+    
+    # update the output box
+    update_output_with_dict(output_message, dictionary, "Steps")
+    
     # update the daily goal meter
-    update_meter(steps_goal_meter, steps_dict)
+    update_meter(steps_goal_meter, dictionary)
     
 def save_on_key_press(event):
 
@@ -177,7 +212,7 @@ def save_on_key_press(event):
 
 
 # create main tkinter window
-app = ttk.Window(themename = 'darkly', title="Health App")
+app = ttk.Window(themename = 'darkly', title="Steps Counter App")
 
 # Bind the on_closing function to the "WM_DELETE_WINDOW" event
 app.protocol("WM_DELETE_WINDOW", save_on_closing)
@@ -185,7 +220,7 @@ app.protocol("WM_DELETE_WINDOW", save_on_closing)
 
 
 # create title
-title = ttk.Label(app, text='Health App', font = 'Calibri 16 bold')
+title = ttk.Label(app, text='Steps Counter App', font = 'Calibri 16 bold')
 title.pack(padx = 10, pady = 5)
 
 # create input frame
@@ -236,7 +271,6 @@ steps_goal_meter = ttk.Meter(
     steps_goal_frame, 
     subtext = "Steps",
     meterthickness = 25,
-    interactive = True,
     amounttotal = 8000,
     stripethickness = 4,
     bootstyle= SUCCESS
@@ -280,15 +314,11 @@ steps_dict = load_json_to_dict("saved_data.json")
 # update the steps goal meter so it doesn't display 0 at first
 update_meter(steps_goal_meter, steps_dict)
 
-# Run app
+update_output_with_dict(output_message, steps_dict, "Steps")
 
-update_meter(steps_goal_meter, steps_dict)
 while appRunning:
     app.update()
-    update_widget_with_dict(output_message, steps_dict, "Steps")
 app.destroy()
-
-
 
 
 
