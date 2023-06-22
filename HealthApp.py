@@ -12,6 +12,7 @@ import os
 
 appRunning = True   # variable is always true while the app is running
 
+#* DEFINING FUNCTIONS
 
 def save_on_closing():
     global appRunning
@@ -280,7 +281,7 @@ def steps_goal_popup():
     popup.lift()
 
 
-
+#* CREATING WIDGETS
 
 # create main tkinter window
 app = ttk.Window(themename = 'darkly', title="Steps Counter App")
@@ -294,8 +295,23 @@ app.protocol("WM_DELETE_WINDOW", save_on_closing)
 title = ttk.Label(app, text='Steps Counter App', font = 'Calibri 16 bold')
 title.pack(padx = 10, pady = 5)
 
+
+notebook = ttk.Notebook(app)
+notebook.pack(padx = 10, pady = 10,)
+
+logging_tab = ttk.Frame(notebook, width=400, height=280)
+
+graph_tab = ttk.Frame(notebook, width=400, height=280)
+
+logging_tab.pack(fill='both', expand=True)
+graph_tab.pack(fill='both', expand=True)
+
+notebook.add(logging_tab, text='Exercise Logging')
+notebook.add(graph_tab, text='Statistics View')
+
+
 # create input frame
-input_frame = ttk.Labelframe(app, text = "Steps Recorder")
+input_frame = ttk.Labelframe(logging_tab, text = "Steps Recorder")
 
 # create date radiobutton
 date_radio_var = ttk.StringVar()
@@ -335,7 +351,7 @@ input_frame.pack(padx= 5, pady = 5)
 steps_entry.bind('<KeyPress>', save_on_key_press)
 
 # create steps goal frame
-steps_meter_frame = ttk.Labelframe(app, text = "Daily Goal")
+steps_meter_frame = ttk.Labelframe(logging_tab, text = "Daily Goal")
 
 # create steps goal meter
 steps_meter = ttk.Meter(
@@ -370,19 +386,19 @@ steps_meter_frame.pack(side = RIGHT, padx= 5, pady = 5)
 
 # create output frame
 
-output_frame = ttk.Labelframe(app, text = "Stats Log")
+output_frame = ttk.Labelframe(logging_tab, text = "Stats Log")
 
 # create output message
-output_message = ttk.Text(output_frame, state= DISABLED, height= 12.4)
+output_message = ttk.Text(output_frame, state= DISABLED, height= 15, font = "Calibri 12")
 output_message.pack(padx= 5, pady = 5)
 
 output_frame.pack(side = LEFT, padx= 5, pady = 5)
 
 
 
+#* APP RUNTIME
 
-
-# load dictionary from file 
+# load values from file 
 steps_dict, steps_goal = load_json_data("saved_data.json")
 
 # Set the initial steps meter total value to be the steps_goal loaded from the .json file
