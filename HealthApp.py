@@ -15,8 +15,12 @@ appRunning = True   # variable is always true while the app is running
 
 def save_on_closing():
     global appRunning
+    global steps_dict
+    
     print("Closing the program...")
-
+    
+    steps_dict = insert_missing_dates(steps_dict) # adds missing dates to the dict before it gets saved
+    
     # writes the contents of the steps dictionary to a .json file
     json.dump(steps_dict, open( "saved_data.json", "w" ))
 
@@ -79,8 +83,6 @@ def get_date():
 
 def insert_missing_dates(dictionary):
     
-    sort_dict_by_key(dictionary)
-    
     new_dictionary = {}
     keys = list(dictionary.keys())
 
@@ -112,14 +114,14 @@ def insert_missing_dates(dictionary):
 
     return new_dictionary
 
-def save_with_date(entry_widget, dictionary):
-    #TODO NOT SURE IF PASSES BY REFERENCE: global steps_dict
-    
+def save_with_date(entry_widget, dictionary):    
     # get user input from entry widget
     user_input = entry_widget.get()
 
     if user_input.isnumeric(): #only saves the data if the input is a number.
-
+        
+        entry_widget.configure(bootstyle="primary") # changes the entry widget colour to the "primary" colour, to show that the input is correct
+        
         user_input = int(user_input)
         # get current date
         current_date = get_date()
@@ -130,7 +132,6 @@ def save_with_date(entry_widget, dictionary):
             new_value = existing_value + user_input
 
             dictionary.update({current_date: new_value})
-
         else:
             dictionary.update({current_date: user_input})
 
@@ -140,14 +141,16 @@ def save_with_date(entry_widget, dictionary):
         
         dictionary = insert_missing_dates(dictionary)
         
-        #TODO NOT SURE IF PASSES BY REF: steps_dict = dictionary
         
         # update the output box
         update_output_with_dict(output_message, dictionary, "Steps")
         
         # update the daily goal meter
         update_meter(steps_meter, dictionary)
-
+    else:
+        entry_widget.configure(bootstyle="danger") # changes the entry widget colour to red, to show that the input is incorrect
+        
+    return dictionary
 
 def update_output_with_dict(text_widget, dictionary, value_type): 
     # value_type is the prefix added before the value in the output.
@@ -213,6 +216,16 @@ def save_on_key_press(event):
         save_with_date(steps_entry, steps_dict)
 
 
+def update_meter(meter, dictionary):
+    current_date = datetime.today().strftime('%Y%m%d') # get current date
+    
+    # if the current date has an entry in the dictionary, set the meter to that value, otherwise set it to 0 
+    try:
+        value = dictionary[current_date]
+    except:
+        value = 0
+        
+    meter.configure(amountused = value)
 
 # create main tkinter window
 app = ttk.Window(themename = 'darkly', title="Steps Counter App")
@@ -281,28 +294,34 @@ steps_meter = ttk.Meter(
 
 steps_meter.pack(padx= 5, pady = 5)
 
+
+def set_meter_total(meter_widget, total, total_prefix_string):
+    meter_widget.configure(amounttotal= total)
+    edit_step_goal_text.configure(text= f"{total_prefix_string} {total}")
+    
+def steps_goal_popup():
+    global popup
+    popup = ttk.Toplevel(app)
+    popup.geometry("250x150")
+    popup.title("Edit Steps Goal")
+    
+    popup_title = ttk.Label(popup, text="Edit Steps Goal:", font = 'Calibri 16 bold', bootstyle="success")
+    popup_title.pack(pady="10")
+    
+    popup_entry = ttk.Entry()
+    
 # steps goal editor section 
 steps_goal_editor_frame = ttk.Frame(steps_meter_frame) # creates an invisible frame so that the edit goal text and button can be placed properly
 
-edit_step_goal_text = ttk.Label(steps_goal_editor_frame, text= "Test")
+# set steps goal value
+steps_goal = 8000
+
+edit_step_goal_text = ttk.Label(steps_goal_editor_frame, text= f"Steps Goal: {steps_goal}")
 edit_step_goal_text.pack(padx= 5, pady = 5)
 
 steps_goal_editor_frame.pack(padx= 5, pady = 5)
 steps_meter_frame.pack(side = "right", padx= 5, pady = 5)
 
-def set_meter_total(meter_widget, total):
-    meter_widget.configure(amounttotal= total)
-
-def update_meter(meter, dictionary):
-    current_date = datetime.today().strftime('%Y%m%d') # get current date
-    
-    # if the current date has an entry in the dictionary, set the meter to that value, otherwise set it to 0 
-    try:
-        value = dictionary[current_date]
-    except:
-        value = 0
-        
-    meter.configure(amountused = value)
 
 # create output frame
 
@@ -326,6 +345,7 @@ update_meter(steps_meter, steps_dict)
 
 update_output_with_dict(output_message, steps_dict, "Steps")
 
+steps_goal_popup()
 while appRunning:
     app.update()
 app.destroy()
