@@ -1,5 +1,5 @@
 # Written by Harry McGrath for Year 12 SDD, 2023
-#? this colour of comment denotes weird shit that still works for some reason
+#? this colour of comment denotes unintuitive snippets of code that need extra explanation
 
 # Importing libraries
 import ttkbootstrap as ttk
@@ -16,37 +16,43 @@ appRunning = True   # variable is always true while the app is running
 def save_on_closing():
     global appRunning
     global steps_dict
+    global steps_goal
     
     print("Closing the program...")
     
     steps_dict = insert_missing_dates(steps_dict) # adds missing dates to the dict before it gets saved
     
+    json_data = {
+        "steps_dict" : steps_dict,
+        "steps_goal" : steps_goal
+    }
+    
     # writes the contents of the steps dictionary to a .json file
-    json.dump(steps_dict, open( "saved_data.json", "w" ))
+    json.dump(json_data, open( "saved_data.json", "w" ))
 
     # closes the window
     appRunning = False
 
 
-def load_json_to_dict(file_path):
+def load_json_data(file_path):
     if os.path.exists(file_path):
         # Check if the file is empty
         if os.stat(file_path).st_size == 0:
-            # Create new JSON file with an empty dictionary
-            output_dict = {}
+            # Create new JSON file with an empty dictionary if file is empty
+            output_data = {"steps_dict": {}, "steps_goal": 8000} #? 8000 is used as the default steps goal value 
             with open(file_path, "w") as file:
-                json.dump(output_dict, file)
+                json.dump(output_data, file)
         else:
             # Load data from existing non-empty JSON file
             with open(file_path) as file:
-                output_dict = json.load(file)
+                output_data = json.load(file)
     else:
-        # Create new JSON file with an empty dictionary
-        output_dict = {}
+        # Create new JSON file with an empty dictionary and variable
+        output_data = {"steps_dict": {}, "steps_goal": 8000} #? 8000 is used as the default steps goal value 
         with open(file_path, "w") as file:
-            json.dump(output_dict, file)
+            json.dump(output_data, file)
 
-    return output_dict
+    return output_data["steps_dict"], output_data["steps_goal"]
 
 
 def sort_dict_by_key(dictionary):
@@ -156,7 +162,7 @@ def update_output_with_dict(text_widget, dictionary, value_type):
     # value_type is the prefix added before the value in the output.
     # For example, value_type = "Pushups" will give a result like 19/02/2023 - Pushups: 35
     
-    text_widget.configure(state= "normal") # "opens" the text widget so its contents can be edited
+    text_widget.configure(state = NORMAL) # "opens" the text widget so its contents can be edited
     
     text_widget.delete(1.0, END) # deletes any text currently in the widget
     
@@ -199,10 +205,7 @@ def clear_dict_confirm(dictionary, message):
         # Reset the history
         dictionary.clear()
     
-    sort_dict_by_key(dictionary)
-    
-    insert_missing_dates(dictionary)
-    
+  
     # update the output box
     update_output_with_dict(output_message, dictionary, "Steps")
     
@@ -226,6 +229,58 @@ def update_meter(meter, dictionary):
         value = 0
         
     meter.configure(amountused = value)
+
+def set_meter_total(meter_widget, total, total_prefix_string):
+    global steps_goal
+    
+    meter_widget.configure(amounttotal= total)
+    edit_step_goal_text.configure(text= f"{total_prefix_string} {total}")
+    steps_goal = total
+    
+
+
+def steps_goal_popup():
+    global popup
+
+    def confirm_action():
+        
+        input_value = popup_entry.get()
+
+        set_meter_total(steps_meter, input_value, "Steps Goal: ")
+        # Close the popup window after executing the desired action
+        popup.destroy()
+
+    def cancel_action():
+        # Function to be executed when the Cancel button is clicked
+        
+        # Close the popup window without taking any action
+        popup.destroy()
+
+    popup = ttk.Toplevel(app)
+    popup.geometry("250x150")
+    popup.title("Edit Steps Goal")
+
+    popup_title = ttk.Label(popup, text="Edit Steps Goal:", font='Calibri 16 bold', bootstyle=SUCCESS)
+    popup_title.pack(pady="10")
+
+    popup_entry = ttk.Entry(popup)
+    popup_entry.pack(pady=10)
+
+    buttons_frame = ttk.Frame(popup)
+
+    cancel_button = ttk.Button(buttons_frame, text="Cancel", bootstyle=SUCCESS, command=cancel_action)
+    cancel_button.pack(side=LEFT, padx=10, pady=5)
+
+    confirm_button = ttk.Button(buttons_frame, text="Confirm", bootstyle=SUCCESS, command=confirm_action)
+    confirm_button.pack(side=RIGHT, padx=10, pady=5)
+
+    buttons_frame.pack()
+    
+    popup.grab_set()
+    popup.lift()
+
+
+
 
 # create main tkinter window
 app = ttk.Window(themename = 'darkly', title="Steps Counter App")
@@ -253,26 +308,26 @@ date_radio_button2.pack(padx = 5, pady = 5)
 
 # create date selector
 date_selector = ttk.DateEntry(input_frame)
-date_selector.pack(side = 'left', padx = 5, pady = 5)
+date_selector.pack(side = LEFT, padx = 5, pady = 5)
 
 # create entry field
 steps_entry = ttk.Entry(input_frame)
-steps_entry.pack(side = 'left', padx = 5, pady = 5)
+steps_entry.pack(side = LEFT, padx = 5, pady = 5)
 
 #? Reason why lambda is used: ttk classes require a function with no inputs in the "command" parameter,
 #? and the workaround to this is using lambda to turn functions that have inputs into temporary inputless functions
 
 # create save button
 save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(steps_entry, steps_dict))
-save_button.pack(side = 'left', padx = 5, pady = 5)
+save_button.pack(side = LEFT, padx = 5, pady = 5)
 
 # create clear history button
 clear_history_button = ttk.Button(input_frame, text = 'Clear History', command = lambda: clear_dict_confirm(steps_dict, "Are you sure you want to clear your steps history?"))
-clear_history_button.pack(side = 'right', padx= 5, pady = 5)
+clear_history_button.pack(side = RIGHT, padx= 5, pady = 5)
 
 # create reset day button
 reset_day_button = ttk.Button(input_frame, text = 'Reset Day', command = lambda: reset_day(steps_dict))
-reset_day_button.pack(side = 'right', padx= 5, pady = 5)
+reset_day_button.pack(side = RIGHT, padx= 5, pady = 5)
 
 input_frame.pack(padx= 5, pady = 5)
 
@@ -287,7 +342,7 @@ steps_meter = ttk.Meter(
     steps_meter_frame, 
     subtext = "Steps",
     meterthickness = 25,
-    amounttotal = 8000,
+    amounttotal = 666, # if the total is actually 666 upon loading the window, Harry's probably messed something up
     stripethickness = 4,
     bootstyle= SUCCESS
     )
@@ -295,32 +350,22 @@ steps_meter = ttk.Meter(
 steps_meter.pack(padx= 5, pady = 5)
 
 
-def set_meter_total(meter_widget, total, total_prefix_string):
-    meter_widget.configure(amounttotal= total)
-    edit_step_goal_text.configure(text= f"{total_prefix_string} {total}")
-    
-def steps_goal_popup():
-    global popup
-    popup = ttk.Toplevel(app)
-    popup.geometry("250x150")
-    popup.title("Edit Steps Goal")
-    
-    popup_title = ttk.Label(popup, text="Edit Steps Goal:", font = 'Calibri 16 bold', bootstyle="success")
-    popup_title.pack(pady="10")
-    
-    popup_entry = ttk.Entry()
-    
+
+
 # steps goal editor section 
 steps_goal_editor_frame = ttk.Frame(steps_meter_frame) # creates an invisible frame so that the edit goal text and button can be placed properly
 
 # set steps goal value
-steps_goal = 8000
+steps_goal = 8000 
 
 edit_step_goal_text = ttk.Label(steps_goal_editor_frame, text= f"Steps Goal: {steps_goal}")
-edit_step_goal_text.pack(padx= 5, pady = 5)
+edit_step_goal_text.pack(side = LEFT, padx= 5, pady = 5)
+
+edit_step_goal_button = ttk.Button(steps_goal_editor_frame, text = "Edit Goal", bootstyle = SUCCESS, command = steps_goal_popup)
+edit_step_goal_button.pack(side = RIGHT, padx= 5, pady = 5)
 
 steps_goal_editor_frame.pack(padx= 5, pady = 5)
-steps_meter_frame.pack(side = "right", padx= 5, pady = 5)
+steps_meter_frame.pack(side = RIGHT, padx= 5, pady = 5)
 
 
 # create output frame
@@ -328,24 +373,26 @@ steps_meter_frame.pack(side = "right", padx= 5, pady = 5)
 output_frame = ttk.Labelframe(app, text = "Stats Log")
 
 # create output message
-output_message = ttk.Text(output_frame, state= "disabled", height= 12.4)
+output_message = ttk.Text(output_frame, state= DISABLED, height= 12.4)
 output_message.pack(padx= 5, pady = 5)
 
-output_frame.pack(side = "left", padx= 5, pady = 5)
+output_frame.pack(side = LEFT, padx= 5, pady = 5)
 
 
 
 
 
 # load dictionary from file 
-steps_dict = load_json_to_dict("saved_data.json")
+steps_dict, steps_goal = load_json_data("saved_data.json")
+
+# Set the initial steps meter total value to be the steps_goal loaded from the .json file
+set_meter_total(steps_meter, steps_goal, "Steps Goal: ")
 
 # update the steps goal meter so it doesn't display 0 at first
 update_meter(steps_meter, steps_dict)
 
 update_output_with_dict(output_message, steps_dict, "Steps")
 
-steps_goal_popup()
 while appRunning:
     app.update()
 app.destroy()
