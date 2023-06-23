@@ -9,6 +9,15 @@ from datetime import *
 import json
 import os
 
+# Importing matplotlib stuff
+import matplotlib
+matplotlib.use('TkAgg') # tells matplotlib to use the backend built for tkinter
+
+from matplotlib.figure import Figure
+from matplotlib.backends.backend_tkagg import (
+    FigureCanvasTkAgg,
+    NavigationToolbar2Tk
+)
 
 appRunning = True   # variable is always true while the app is running
 
@@ -403,6 +412,15 @@ output_message.pack(padx= 5, pady = 5)
 
 output_frame.pack(side = LEFT, padx= 5, pady = 5)
 
+
+
+# create a figure
+figure = Figure(figsize=(6, 4), dpi=100)
+
+canvas = FigureCanvasTkAgg(figure, graph_tab)
+
+canvas.draw()
+canvas.get_tk_widget().pack()
 
 
 #* RUNTIME SETUP
