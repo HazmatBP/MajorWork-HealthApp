@@ -295,7 +295,25 @@ app.protocol("WM_DELETE_WINDOW", save_on_closing)
 title = ttk.Label(app, text='Steps Counter App', font = 'Calibri 16 bold')
 title.pack(padx = 10, pady = 5)
 
+# create date selector frame
+date_frame = ttk.Labelframe(app, text= "Date Selection")
 
+# create date radiobutton
+date_radio_var = ttk.StringVar()
+
+date_radio_button1 = ttk.Radiobutton(date_frame, text="Current Date", variable = date_radio_var, value="current_date")
+date_radio_button2 = ttk.Radiobutton(date_frame, text="Select Date:", variable = date_radio_var, value="select_date")
+
+date_radio_button1.pack(side=LEFT, padx = 5, pady = 5)
+date_radio_button2.pack(side=LEFT, padx = 5, pady = 5)
+
+date_frame.pack(side=TOP)
+
+# create date selector
+date_selector = ttk.DateEntry(date_frame)
+date_selector.pack(side = RIGHT, padx = 5, pady = 5)
+
+# create tabs notebook
 notebook = ttk.Notebook(app)
 notebook.pack(padx = 10, pady = 10,)
 
@@ -310,21 +328,9 @@ notebook.add(logging_tab, text='Exercise Logging')
 notebook.add(graph_tab, text='Statistics View')
 
 
+
 # create input frame
 input_frame = ttk.Labelframe(logging_tab, text = "Steps Recorder")
-
-# create date radiobutton
-date_radio_var = ttk.StringVar()
-
-date_radio_button1 = ttk.Radiobutton(input_frame, text="Current Date", variable = date_radio_var, value="current_date")
-date_radio_button2 = ttk.Radiobutton(input_frame, text="Select Date:", variable = date_radio_var, value="select_date")
-
-date_radio_button1.pack(padx = 5, pady = 5)
-date_radio_button2.pack(padx = 5, pady = 5)
-
-# create date selector
-date_selector = ttk.DateEntry(input_frame)
-date_selector.pack(side = LEFT, padx = 5, pady = 5)
 
 # create entry field
 steps_entry = ttk.Entry(input_frame)
@@ -334,15 +340,15 @@ steps_entry.pack(side = LEFT, padx = 5, pady = 5)
 #? and the workaround to this is using lambda to turn functions that have inputs into temporary inputless functions
 
 # create save button
-save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(steps_entry, steps_dict))
+save_button = ttk.Button(input_frame, text='Save', command = lambda : save_with_date(steps_entry, steps_dict), bootstyle=SUCCESS)
 save_button.pack(side = LEFT, padx = 5, pady = 5)
 
 # create clear history button
-clear_history_button = ttk.Button(input_frame, text = 'Clear History', command = lambda: clear_dict_confirm(steps_dict, "Are you sure you want to clear your steps history?"))
+clear_history_button = ttk.Button(input_frame, text = 'Clear History', command = lambda: clear_dict_confirm(steps_dict, "Are you sure you want to clear your steps history?"), bootstyle=SUCCESS)
 clear_history_button.pack(side = RIGHT, padx= 5, pady = 5)
 
 # create reset day button
-reset_day_button = ttk.Button(input_frame, text = 'Reset Day', command = lambda: reset_day(steps_dict))
+reset_day_button = ttk.Button(input_frame, text = 'Reset Day', command = lambda: reset_day(steps_dict), bootstyle=SUCCESS)
 reset_day_button.pack(side = RIGHT, padx= 5, pady = 5)
 
 input_frame.pack(padx= 5, pady = 5)
@@ -360,7 +366,10 @@ steps_meter = ttk.Meter(
     meterthickness = 25,
     amounttotal = 666, # if the total is actually 666 upon loading the window, Harry's probably messed something up
     stripethickness = 4,
-    bootstyle= SUCCESS
+    bootstyle= SUCCESS,
+    metersize= 210,
+    textfont="Helvetica 20 bold",
+    subtextfont="bold"
     )
 
 steps_meter.pack(padx= 5, pady = 5)
@@ -374,7 +383,7 @@ steps_goal_editor_frame = ttk.Frame(steps_meter_frame) # creates an invisible fr
 # set steps goal value
 steps_goal = 8000 
 
-edit_step_goal_text = ttk.Label(steps_goal_editor_frame, text= f"Steps Goal: {steps_goal}")
+edit_step_goal_text = ttk.Label(steps_goal_editor_frame, text= f"Steps Goal: {steps_goal}", font="helvetica 10 bold")
 edit_step_goal_text.pack(side = LEFT, padx= 5, pady = 5)
 
 edit_step_goal_button = ttk.Button(steps_goal_editor_frame, text = "Edit Goal", bootstyle = SUCCESS, command = steps_goal_popup)
@@ -386,17 +395,17 @@ steps_meter_frame.pack(side = RIGHT, padx= 5, pady = 5)
 
 # create output frame
 
-output_frame = ttk.Labelframe(logging_tab, text = "Stats Log")
+output_frame = ttk.Labelframe(logging_tab, text = "Steps Log")
 
 # create output message
-output_message = ttk.Text(output_frame, state= DISABLED, height= 15, font = "Calibri 12")
+output_message = ttk.Text(output_frame, state= DISABLED, height= 12.5, font = "Calibri 12")
 output_message.pack(padx= 5, pady = 5)
 
 output_frame.pack(side = LEFT, padx= 5, pady = 5)
 
 
 
-#* APP RUNTIME
+#* RUNTIME SETUP
 
 # load values from file 
 steps_dict, steps_goal = load_json_data("saved_data.json")
@@ -407,7 +416,11 @@ set_meter_total(steps_meter, steps_goal, "Steps Goal: ")
 # update the steps goal meter so it doesn't display 0 at first
 update_meter(steps_meter, steps_dict)
 
+# update the output box so it loads the info from the dictionary
 update_output_with_dict(output_message, steps_dict, "Steps")
+
+
+date_radio_var.set("current_date") # this makes the "current date" option in the date selector be selected by default
 
 while appRunning:
     app.update()
