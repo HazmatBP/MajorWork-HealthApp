@@ -301,6 +301,16 @@ def update_graph(dictionary):
     # clear previous data
     ax.clear()
     
+    # change the font size of the ticklabels depending on how many entries are in the dictionary, to avoid overlapping labels
+    # i could probably write some formula that does this without any elifs but i'm not good enough at maths to do that and thatd take a massive amount of trial and error 
+    # formula from robert: font size = ((width of plot/amount of columns)-gap between columns/length of title
+    length = len(dictionary)
+    if length > 9:
+        matplotlib.rcParams['font.size'] = 8
+    else:
+        matplotlib.rcParams['font.size'] = 12
+    
+    
     # Update the bar graph data
     ax.bar(
         new_categories, 
@@ -313,6 +323,9 @@ def update_graph(dictionary):
     
     # Redraw the graph canvas
     canvas.draw()
+    
+
+
 
 
 def steps_stats_update():
@@ -518,12 +531,14 @@ bar = ax.bar(categories, values, color = "#00bc8c")
 ax.set_facecolor("#1f1f1f")
 fig.set_facecolor("#1f1f1f")
 
-# sets the font colour
+# sets the font colour and family
 COLOR = 'white'
 matplotlib.rcParams['axes.labelcolor'] = COLOR
 matplotlib.rcParams['text.color'] = COLOR
 matplotlib.rcParams['xtick.color'] = COLOR
 matplotlib.rcParams['ytick.color'] = COLOR
+
+matplotlib.rcParams["font.family"] = "Courier"
 
 # sets the axes colours
 ax.spines['bottom'].set_color("white")
