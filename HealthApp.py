@@ -13,6 +13,7 @@ import os
 import matplotlib
 matplotlib.use('TkAgg') # tells matplotlib to use the backend built for tkinter
 
+import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,
@@ -215,7 +216,6 @@ def clear_dict_confirm(dictionary, message):
         # Reset the history
         dictionary.clear()
     
-  
     # update the output box
     update_output_with_dict(output_message, dictionary, "Steps")
     
@@ -326,9 +326,9 @@ date_selector.pack(side = RIGHT, padx = 5, pady = 5)
 notebook = ttk.Notebook(app)
 notebook.pack(padx = 10, pady = 10,)
 
-logging_tab = ttk.Frame(notebook, width=400, height=280)
+logging_tab = ttk.Frame(notebook)
 
-graph_tab = ttk.Frame(notebook, width=400, height=280)
+graph_tab = ttk.Frame(notebook)
 
 logging_tab.pack(fill='both', expand=True)
 graph_tab.pack(fill='both', expand=True)
@@ -414,13 +414,59 @@ output_frame.pack(side = LEFT, padx= 5, pady = 5)
 
 
 
-# create a figure
-figure = Figure(figsize=(6, 4), dpi=100)
+# Prepare the data for the bar graph
+data = {
+    '25/06/2023': 0,
+    'Test 2': 10,
+    'Test 3': 15,
+    'Test 23': 5,
+    'Test fuck': 156,
+    'Test shit': 3,
+    'Test 87': 5,
+    'Test 23': 28,
+    'Test AAAAA': 5,
+    
+}
 
-canvas = FigureCanvasTkAgg(figure, graph_tab)
+categories = list(data.keys())
+values = list(data.values())
 
+# Create a Matplotlib figure and axis
+fig, ax = plt.subplots()
+
+# Plot the bar graph
+ax.bar(categories, values, color = "#00bc8c")
+
+
+# Create a FigureCanvasTkAgg object to embed the graph in the Tkinter frame
+canvas = FigureCanvasTkAgg(fig, master = graph_tab)
 canvas.draw()
-canvas.get_tk_widget().pack()
+canvas.get_tk_widget().pack(padx = 10, pady= 10, side= TOP, fill= BOTH, expand=True)
+
+NavigationToolbar2Tk(canvas, graph_tab)
+
+def update_graph(dictionary):
+    
+    # get lists of dictionary values and keys
+    new_categories = list(dictionary.keys())
+    new_values = list(dictionary.values())
+    
+        
+    # turns each entry in new_categories into a datetime object and back to reformat it with "/" characters
+    new_categories = [datetime.strptime(date, "%Y%m%d").strftime("%d/%m") for date in new_categories] 
+    
+    
+    # clear previous data
+    ax.clear()
+    
+    # Update the bar graph data
+    ax.bar(new_categories, new_values, color = "#00bc8c")
+    
+    ax.set_xticklabels(new_categories)
+    
+    # Redraw the graph canvas
+    canvas.draw()
+
 
 
 #* RUNTIME SETUP
@@ -438,10 +484,14 @@ update_meter(steps_meter, steps_dict)
 update_output_with_dict(output_message, steps_dict, "Steps")
 
 
+
 date_radio_var.set("current_date") # this makes the "current date" option in the date selector be selected by default
 
 while appRunning:
     app.update()
+    steps_dict = sort_dict_by_key(steps_dict)
+    steps_dict = insert_missing_dates(steps_dict)
+    update_graph(steps_dict)
 app.destroy()
 
 
