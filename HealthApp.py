@@ -105,7 +105,6 @@ def insert_missing_dates(dictionary):
 
     if not keys:
         # If the dictionary is empty, return an empty dictionary
-        print("returning empty dict")
         return new_dictionary
     
     # Get the start and end dates from the dictionary
@@ -290,6 +289,57 @@ def steps_goal_popup():
     popup.lift()
 
 
+def update_graph(dictionary):
+    
+    # get lists of dictionary values and keys
+    new_categories = list(dictionary.keys())
+    new_values = list(dictionary.values())
+     
+    # turns each entry in new_categories into a datetime object and back to reformat it with "/" characters
+    new_categories = [datetime.strptime(date, "%Y%m%d").strftime("%d/%m") for date in new_categories] 
+    
+    # clear previous data
+    ax.clear()
+    
+    # Update the bar graph data
+    ax.bar(
+        new_categories, 
+        new_values, 
+        color = "#00bc8c",
+        )
+    
+    # update the bar labels
+    ax.set_xticklabels(new_categories)
+    
+    # Redraw the graph canvas
+    canvas.draw()
+
+
+def steps_stats_update():
+    values_list = list(steps_dict.values())
+    values_total = sum(values_list)
+    
+    # avoids a division by zero error if there are no entries in the dictionary, also avoids an error later on with the max() function
+    if len(values_list) != 0:
+        values_avg = sum(values_list) / len(values_list)
+        values_max = max(values_list)
+    else:
+        values_avg = 0
+        values_max = 0 
+    # gets the average of the values in the list and changes the widget text to display it (rounded to the nearest whole number)
+    stats_average.configure(text = f"Average Daily Steps: {int(values_avg)}")  
+    
+    if steps_goal != 0:
+        # gets the average daily steps and converts it to a percentage of the set steps goal (has to convert steps_goal to an integer, and also round the result to 2 d.p)
+        stats_average_percentage.configure(text = f"Average % of goal reached: {round(100 * (values_avg / int(steps_goal)), 2)}%")
+    else:
+        stats_average_percentage.configure(text = "Average % of goal reached: N/A (Goal is zero)")
+    
+    stats_total.configure(text = f"Total Steps Done: {values_total}")
+    
+    stats_max.configure(text = f"Highest Steps In One Day: {values_max}")
+    
+
 #* CREATING WIDGETS
 
 # create main tkinter window
@@ -324,14 +374,14 @@ date_selector.pack(side = RIGHT, padx = 5, pady = 5)
 
 # create tabs notebook
 notebook = ttk.Notebook(app)
-notebook.pack(padx = 10, pady = 10,)
+notebook.pack(padx = 10, pady = 10)
 
 logging_tab = ttk.Frame(notebook)
 
 graph_tab = ttk.Frame(notebook)
 
-logging_tab.pack(fill='both', expand=True)
-graph_tab.pack(fill='both', expand=True)
+logging_tab.pack(fill= X, expand=True)
+graph_tab.pack(fill= X, expand=True)
 
 notebook.add(logging_tab, text='Exercise Logging')
 notebook.add(graph_tab, text='Statistics View')
@@ -372,11 +422,11 @@ steps_meter_frame = ttk.Labelframe(logging_tab, text = "Daily Goal")
 steps_meter = ttk.Meter(
     steps_meter_frame, 
     subtext = "Steps",
-    meterthickness = 25,
+    meterthickness = 40,
     amounttotal = 666, # if the total is actually 666 upon loading the window, Harry's probably messed something up
     stripethickness = 4,
     bootstyle= SUCCESS,
-    metersize= 210,
+    metersize= 300,
     textfont="Helvetica 20 bold",
     subtextfont="bold"
     )
@@ -407,27 +457,52 @@ steps_meter_frame.pack(side = RIGHT, padx= 5, pady = 5)
 output_frame = ttk.Labelframe(logging_tab, text = "Steps Log")
 
 # create output message
-output_message = ttk.Text(output_frame, state= DISABLED, height= 12.5, font = "Calibri 12")
-output_message.pack(padx= 5, pady = 5)
+output_message = ttk.Text(output_frame, state= DISABLED, font = "Helvetica 10")
+output_message.pack(padx= 5, pady = 5, fill= Y)
 
 output_frame.pack(side = LEFT, padx= 5, pady = 5)
 
+# create steps stats section
+# ? all of the text values here should not be seen at runtime, because steps_stats_update() should replace all the text values
+stats_frame = ttk.Frame(graph_tab)
+
+stats_title = ttk.Label(stats_frame, text="Steps Stats:", font="Helvetica 14 bold")
+stats_title.pack(padx=5, pady=5)
+
+stats_average = ttk.Label(stats_frame, text="Average Steps: 6666")
+stats_average.pack(padx=5, pady=5)
+
+stats_average_percentage = ttk.Label(stats_frame, text= "Average % of Goal Reached: 6666")
+stats_average_percentage.pack(padx=5, pady=5)
+
+stats_total = ttk.Label(stats_frame, text="Total Steps Done: 6666")
+stats_total.pack(padx=5, pady=5)
+
+stats_max = ttk.Label(stats_frame, text="Highest Steps: 6666")
+stats_max.pack(padx=5, pady=5)
 
 
-# Prepare the data for the bar graph
+stats_frame.pack(padx=10, pady= 10, side=LEFT)
+
+
+
+#* CREATING GRAPH WITH MATPLOTLIB
+
+# Prepare the data for the bar graph 
+#? these values should never be seen when the actual window runs, its just a fallback in case update_graph() doesnt work
 data = {
-    '25/06/2023': 0,
-    'Test 2': 10,
-    'Test 3': 15,
-    'Test 23': 5,
-    'Test fuck': 156,
-    'Test shit': 3,
-    'Test 87': 5,
-    'Test 23': 28,
-    'Test AAAAA': 5,
+    'If': 666,
+    'Youre': 666,
+    'Seeing': 666,
+    'This': 666,
+    'Then': 666,
+    'Ive': 666,
+    'Messed': 666,
+    'Up': 666,
     
 }
 
+# split the data into 2 lists, for the x and y axes respectively
 categories = list(data.keys())
 values = list(data.values())
 
@@ -435,38 +510,37 @@ values = list(data.values())
 fig, ax = plt.subplots()
 
 # Plot the bar graph
-ax.bar(categories, values, color = "#00bc8c")
+bar = ax.bar(categories, values, color = "#00bc8c")
 
+#* bar graph formatting 
+
+# sets the background colour and graph background colour respectively
+ax.set_facecolor("#1f1f1f")
+fig.set_facecolor("#1f1f1f")
+
+# sets the font colour
+COLOR = 'white'
+matplotlib.rcParams['axes.labelcolor'] = COLOR
+matplotlib.rcParams['text.color'] = COLOR
+matplotlib.rcParams['xtick.color'] = COLOR
+matplotlib.rcParams['ytick.color'] = COLOR
+
+# sets the axes colours
+ax.spines['bottom'].set_color("white")
+ax.spines['top'].set_color("white")
+ax.spines['right'].set_color("white")
+ax.spines['left'].set_color("white")
+
+# sets the graph title
+fig.suptitle('Stats Graph', fontsize = 15)
 
 # Create a FigureCanvasTkAgg object to embed the graph in the Tkinter frame
 canvas = FigureCanvasTkAgg(fig, master = graph_tab)
 canvas.draw()
-canvas.get_tk_widget().pack(padx = 10, pady= 10, side= TOP, fill= BOTH, expand=True)
+canvas.get_tk_widget().pack(padx = 10, pady= 10, side= BOTTOM, fill= BOTH, expand=True)
 
+# create the matplotlib toolbar, for graph navigation
 NavigationToolbar2Tk(canvas, graph_tab)
-
-def update_graph(dictionary):
-    
-    # get lists of dictionary values and keys
-    new_categories = list(dictionary.keys())
-    new_values = list(dictionary.values())
-    
-        
-    # turns each entry in new_categories into a datetime object and back to reformat it with "/" characters
-    new_categories = [datetime.strptime(date, "%Y%m%d").strftime("%d/%m") for date in new_categories] 
-    
-    
-    # clear previous data
-    ax.clear()
-    
-    # Update the bar graph data
-    ax.bar(new_categories, new_values, color = "#00bc8c")
-    
-    ax.set_xticklabels(new_categories)
-    
-    # Redraw the graph canvas
-    canvas.draw()
-
 
 
 #* RUNTIME SETUP
@@ -488,10 +562,14 @@ update_output_with_dict(output_message, steps_dict, "Steps")
 date_radio_var.set("current_date") # this makes the "current date" option in the date selector be selected by default
 
 while appRunning:
+    # updates the whole window
     app.update()
+    
+    # graph updating 
     steps_dict = sort_dict_by_key(steps_dict)
     steps_dict = insert_missing_dates(steps_dict)
     update_graph(steps_dict)
+    steps_stats_update()
 app.destroy()
 
 
