@@ -14,7 +14,6 @@ import matplotlib
 matplotlib.use('TkAgg') # tells matplotlib to use the backend built for tkinter
 
 import matplotlib.pyplot as plt
-from matplotlib.figure import Figure
 from matplotlib.backends.backend_tkagg import (
     FigureCanvasTkAgg,
     NavigationToolbar2Tk
