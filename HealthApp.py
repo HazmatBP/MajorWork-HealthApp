@@ -294,10 +294,10 @@ def update_graph(dictionary):
     # get lists of dictionary values and keys
     new_categories = list(dictionary.keys())
     new_values = list(dictionary.values())
-     
+
     # turns each entry in new_categories into a datetime object and back to reformat it with "/" characters
     new_categories = [datetime.strptime(date, "%Y%m%d").strftime("%d/%m") for date in new_categories] 
-    
+
     # clear previous data
     ax.clear()
     
@@ -534,18 +534,19 @@ ax.set_facecolor("#1f1f1f")
 fig.set_facecolor("#1f1f1f")
 
 # sets the font colour and family
-COLOR = 'white'
-matplotlib.rcParams['axes.labelcolor'] = COLOR
-matplotlib.rcParams['text.color'] = COLOR
-matplotlib.rcParams['xtick.color'] = COLOR
-matplotlib.rcParams['ytick.color'] = COLOR
+font_colour = 'white'
+matplotlib.rcParams['axes.labelcolor'] = font_colour
+matplotlib.rcParams['text.color'] = font_colour
+matplotlib.rcParams['xtick.color'] = font_colour
+matplotlib.rcParams['ytick.color'] = font_colour
 
 
 # sets the axes colours
-ax.spines['bottom'].set_color("white")
-ax.spines['top'].set_color("white")
-ax.spines['right'].set_color("white")
-ax.spines['left'].set_color("white")
+axes_colour = "white"
+ax.spines['bottom'].set_color(axes_colour)
+ax.spines['top'].set_color(axes_colour)
+ax.spines['right'].set_color(axes_colour)
+ax.spines['left'].set_color(axes_colour)
 
 # sets the graph title
 fig.suptitle('Stats Graph', fontsize = 15)
